@@ -1,7 +1,7 @@
 'use strict';
 
 const metatests = require('metatests');
-const { Database, Query } = require('..');
+const { Database, SelectQuery } = require('..');
 
 const config = {
   host: process.env.POSTGRES_HOST || '127.0.0.1',
@@ -51,7 +51,7 @@ metatests.test('Database.select and/or', async (test) => {
   test.end();
 });
 
-metatests.test('Query.limit/offset', async (test) => {
+metatests.test('SelectQuery.limit/offset', async (test) => {
   const res1 = await db.select('City').limit(3);
   test.strictEqual(res1.length, 3);
   test.strictEqual(res1[0].name, 'Beijing');
@@ -64,7 +64,7 @@ metatests.test('Query.limit/offset', async (test) => {
   test.end();
 });
 
-metatests.test('Query.order/desc', async (test) => {
+metatests.test('SelectQuery.order/desc', async (test) => {
   const res1 = await db.select('City').order('name');
   test.strictEqual(res1[0].name, 'Beijing');
   const res2 = await db.select('City').desc('name');
@@ -76,7 +76,7 @@ metatests.test('Query.order/desc', async (test) => {
   test.end();
 });
 
-metatests.test('Query.toObject/from', async (test) => {
+metatests.test('SelectQuery.toObject/from', async (test) => {
   const query1 = db
     .select('City', ['*'], { cityId: 1 }, { name: 'Kiev' })
     .limit(3)
@@ -91,7 +91,7 @@ metatests.test('Query.toObject/from', async (test) => {
   };
   test.strictEqual(metadata, expected);
 
-  const res = await Query.from(db, metadata);
+  const res = await SelectQuery.from(db, metadata);
   test.strictEqual(res, [{ cityId: '3', name: 'Kiev', countryId: '1' }]);
   test.end();
 });
@@ -116,6 +116,19 @@ metatests.test('Database.insert/update/delete/upsert', async (test) => {
   );
   test.strictEqual(res5.rowCount, 1);
   await db.delete('City', { name: 'Lao Cai' });
+  test.end();
+});
+
+metatests.test('Database.insert/update.returning', async (test) => {
+  const res1 = await db
+    .insert('City', { name: 'Lutsk', countryId: 1 })
+    .returning('name');
+  test.strictEqual(res1.rows, [{ name: 'Lutsk' }]);
+  const res2 = await db
+    .update('City', { name: 'LUTSK' }, { name: 'Lutsk' })
+    .returning('name');
+  test.strictEqual(res2.rows, [{ name: 'LUTSK' }]);
+  await db.delete('City', { name: 'LUTSK' });
   test.end();
 });
 
