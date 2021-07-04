@@ -7,7 +7,10 @@
   - async fields(table): Array
   - async tables(): Array
   - async count(table, condition): number
+  - async insert(...).onConflict(fields).doNothing()/doUpdate(exclude): Object
+  - async insert(...)/update(...).returning(fields): Object
 - Add typings for Database and Query classes
+- Create SelectQuery, InsertQuery, UpdateQuery
 
 ## [1.1.5][] - 2021-07-04
 
