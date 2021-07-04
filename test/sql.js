@@ -132,6 +132,21 @@ metatests.test('Database.insert/update.returning', async (test) => {
   test.end();
 });
 
+metatests.test('Database.insert/update.onConflict', async (test) => {
+  const res1 = await db
+    .insert('City', { name: 'Lviv', countryId: 1 })
+    .onConflict(['cityId'])
+    .doNothing();
+  test.strictEqual(res1.rowCount, 1);
+  const res2 = await db
+    .insert('City', { name: 'Rivne', countryId: 1 })
+    .onConflict(['cityId'])
+    .doUpdate(['!cityId']);
+  test.strictEqual(res2.rowCount, 1);
+  await db.delete('City', { name: 'Lviv' }, { name: 'Rivne' });
+  test.end();
+});
+
 metatests.test('Database.row', async (test) => {
   const res = await db.row('City', ['*'], { name: 'Kiev' });
   test.strictEqual(res, { cityId: '3', name: 'Kiev', countryId: '1' });

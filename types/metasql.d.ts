@@ -76,6 +76,10 @@ export class UpsertQuery {
 
 export class InsertQuery extends UpsertQuery {
   constructor(db: Database, table: string, record: object);
+  onConflict(fields: string | Array<string>): {
+    doNothing(): InsertQuery;
+    doUpdate(exclude?: string | Array<string>): InsertQuery;
+  };
   then(resolve: (result: any) => void, reject: Function): void;
 }
 
